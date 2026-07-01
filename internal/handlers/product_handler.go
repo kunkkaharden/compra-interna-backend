@@ -20,7 +20,7 @@ type productRequest struct {
 
 func (h *ProductHandler) List(c *gin.Context) {
 	var products []models.Product
-	if err := h.DB.Find(&products).Error; err != nil {
+	if err := h.DB.Where("archived = ?", false).Find(&products).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error interno"})
 		return
 	}
@@ -75,8 +75,8 @@ func (h *ProductHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, product)
 }
 
-func (h *ProductHandler) Delete(c *gin.Context) {
-	result := h.DB.Delete(&models.Product{}, c.Param("id"))
+func (h *ProductHandler) Archive(c *gin.Context) {
+	result := h.DB.Model(&models.Product{}).Where("id = ?", c.Param("id")).Update("archived", true)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error interno"})
 		return

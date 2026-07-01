@@ -18,6 +18,7 @@ type UserHandler struct {
 
 type createUserRequest struct {
 	Usuario     string `json:"usuario" binding:"required"`
+	Nombre      string `json:"nombre"`
 	Contrasenna string `json:"contrasenna" binding:"required"`
 	IsActive    *bool  `json:"isactive"`
 }
@@ -51,6 +52,7 @@ func (h *UserHandler) Create(c *gin.Context) {
 
 	user := models.User{
 		Usuario:     req.Usuario,
+		Nombre:      req.Nombre,
 		Contrasenna: hash,
 		IsActive:    isActive,
 	}
@@ -78,6 +80,7 @@ func (h *UserHandler) Get(c *gin.Context) {
 
 type updateUserRequest struct {
 	Usuario     *string `json:"usuario"`
+	Nombre      *string `json:"nombre"`
 	Contrasenna *string `json:"contrasenna"`
 	IsActive    *bool   `json:"isactive"`
 }
@@ -97,6 +100,9 @@ func (h *UserHandler) Update(c *gin.Context) {
 
 	if req.Usuario != nil {
 		user.Usuario = *req.Usuario
+	}
+	if req.Nombre != nil {
+		user.Nombre = *req.Nombre
 	}
 	if req.IsActive != nil {
 		user.IsActive = *req.IsActive

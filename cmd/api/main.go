@@ -52,7 +52,7 @@ func main() {
 		protected.GET("/products", productHandler.List)
 		protected.POST("/products", productHandler.Create)
 		protected.PUT("/products/:id", productHandler.Update)
-		protected.DELETE("/products/:id", productHandler.Delete)
+		protected.PATCH("/products/:id/archive", productHandler.Archive)
 
 		protected.GET("/monthly-lists", monthlyListHandler.List)
 		protected.POST("/monthly-lists", monthlyListHandler.Create)
@@ -70,7 +70,7 @@ func main() {
 func corsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Authorization, Content-Type")
 		if c.Request.Method == http.MethodOptions {
 			c.AbortWithStatus(http.StatusNoContent)

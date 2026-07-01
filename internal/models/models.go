@@ -5,6 +5,7 @@ import "time"
 type User struct {
 	ID          uint      `gorm:"primaryKey" json:"id"`
 	Usuario     string    `gorm:"uniqueIndex;not null" json:"usuario"`
+	Nombre      string    `json:"nombre"`
 	Contrasenna string    `gorm:"not null" json:"-"`
 	IsActive    bool      `gorm:"not null" json:"isactive"`
 	CreatedAt   time.Time `json:"created_at"`
@@ -15,6 +16,7 @@ type Product struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	CodigoTkc string    `gorm:"uniqueIndex;not null" json:"codigo_tkc"`
 	Nombre    string    `gorm:"not null" json:"nombre"`
+	Archived  bool      `gorm:"not null;default:false" json:"archived"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
