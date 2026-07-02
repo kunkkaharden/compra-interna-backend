@@ -19,8 +19,9 @@ type productRequest struct {
 }
 
 func (h *ProductHandler) List(c *gin.Context) {
+	showArchived := c.Query("archived") == "true"
 	var products []models.Product
-	if err := h.DB.Where("archived = ?", false).Find(&products).Error; err != nil {
+	if err := h.DB.Where("archived = ?", showArchived).Find(&products).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error interno"})
 		return
 	}
@@ -73,6 +74,19 @@ func (h *ProductHandler) Update(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, product)
+}
+
+func (h *ProductHandler) Unarchive(c *gin.Context) {
+	result := h.DB.Model(&models.Product{}).Where("id = ?", c.Param("id")).Update("archived", false)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error interno"})
+		return
+	}
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "producto no encontrado"})
+		return
+	}
+	c.Status(http.StatusNoContent)
 }
 
 func (h *ProductHandler) Archive(c *gin.Context) {

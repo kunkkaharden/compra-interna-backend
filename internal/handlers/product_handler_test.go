@@ -20,7 +20,8 @@ func newProductRouter(db *gorm.DB) *gin.Engine {
 	router.GET("/api/products", h.List)
 	router.POST("/api/products", h.Create)
 	router.PUT("/api/products/:id", h.Update)
-	router.DELETE("/api/products/:id", h.Delete)
+	router.PATCH("/api/products/:id/archive", h.Archive)
+	router.PATCH("/api/products/:id/unarchive", h.Unarchive)
 	return router
 }
 
@@ -92,12 +93,12 @@ func TestProduct_UpdateNotFound(t *testing.T) {
 	}
 }
 
-func TestProduct_DeleteNotFound(t *testing.T) {
+func TestProduct_ArchiveNotFound(t *testing.T) {
 	db := setupTestDB(t)
 	router := newProductRouter(db)
 
 	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, httptest.NewRequest(http.MethodDelete, "/api/products/999", nil))
+	router.ServeHTTP(rec, httptest.NewRequest(http.MethodPatch, "/api/products/999/archive", nil))
 	if rec.Code != http.StatusNotFound {
 		t.Fatalf("expected 404, got %d", rec.Code)
 	}

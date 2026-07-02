@@ -53,12 +53,14 @@ func main() {
 		protected.POST("/products", productHandler.Create)
 		protected.PUT("/products/:id", productHandler.Update)
 		protected.PATCH("/products/:id/archive", productHandler.Archive)
+		protected.PATCH("/products/:id/unarchive", productHandler.Unarchive)
 
 		protected.GET("/monthly-lists", monthlyListHandler.List)
 		protected.POST("/monthly-lists", monthlyListHandler.Create)
 		protected.GET("/monthly-lists/:id", monthlyListHandler.Get)
 		protected.PUT("/monthly-lists/:id", monthlyListHandler.Update)
 		protected.DELETE("/monthly-lists/:id", monthlyListHandler.Delete)
+		protected.PATCH("/monthly-lists/:id/close", monthlyListHandler.Close)
 	}
 
 	log.Printf("listening on :%s", cfg.Port)
