@@ -18,6 +18,7 @@ func Open(path string) (*gorm.DB, error) {
 		&models.Product{},
 		&models.MonthlyList{},
 		&models.MonthlyListItem{},
+		&models.PedidoItem{},
 	); err != nil {
 		return nil, err
 	}

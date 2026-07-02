@@ -91,6 +91,9 @@ func (h *MonthlyListHandler) Create(c *gin.Context) {
 			return lookupErr
 		}
 
+		if list.Cerrado {
+			return gorm.ErrInvalidData
+		}
 		if err := tx.Where("monthly_list_id = ?", list.ID).Delete(&models.MonthlyListItem{}).Error; err != nil {
 			return err
 		}
@@ -99,6 +102,10 @@ func (h *MonthlyListHandler) Create(c *gin.Context) {
 		return tx.Save(&list).Error
 	})
 
+	if errors.Is(err, gorm.ErrInvalidData) {
+		c.JSON(http.StatusConflict, gin.H{"error": "lista cerrada, no se puede modificar"})
+		return
+	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error interno"})
 		return
@@ -106,6 +113,19 @@ func (h *MonthlyListHandler) Create(c *gin.Context) {
 
 	h.DB.Preload("Items").First(&list, list.ID)
 	c.JSON(http.StatusCreated, list)
+}
+
+func (h *MonthlyListHandler) Close(c *gin.Context) {
+	result := h.DB.Model(&models.MonthlyList{}).Where("id = ?", c.Param("id")).Update("cerrado", true)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error interno"})
+		return
+	}
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "lista no encontrada"})
+		return
+	}
+	c.Status(http.StatusNoContent)
 }
 
 func (h *MonthlyListHandler) Update(c *gin.Context) {

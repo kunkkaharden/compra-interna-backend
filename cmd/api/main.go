@@ -34,6 +34,7 @@ func main() {
 	userHandler := &handlers.UserHandler{DB: gormDB}
 	productHandler := &handlers.ProductHandler{DB: gormDB}
 	monthlyListHandler := &handlers.MonthlyListHandler{DB: gormDB}
+	pedidoHandler := &handlers.PedidoHandler{DB: gormDB}
 
 	api := router.Group("/api")
 	api.POST("/auth/login", authHandler.Login)
@@ -61,6 +62,9 @@ func main() {
 		protected.PUT("/monthly-lists/:id", monthlyListHandler.Update)
 		protected.DELETE("/monthly-lists/:id", monthlyListHandler.Delete)
 		protected.PATCH("/monthly-lists/:id/close", monthlyListHandler.Close)
+
+		protected.GET("/pedidos", pedidoHandler.Get)
+		protected.POST("/pedidos", pedidoHandler.Save)
 	}
 
 	log.Printf("listening on :%s", cfg.Port)

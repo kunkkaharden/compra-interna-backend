@@ -26,9 +26,21 @@ type MonthlyList struct {
 	Mes       int               `gorm:"not null;uniqueIndex:idx_mes_year" json:"mes"`
 	Year      int               `gorm:"not null;uniqueIndex:idx_mes_year" json:"year"`
 	BudgetA   float64           `json:"budget_a"`
+	Cerrado   bool              `gorm:"not null;default:false" json:"cerrado"`
 	Items     []MonthlyListItem `json:"items"`
 	CreatedAt time.Time         `json:"created_at"`
 	UpdatedAt time.Time         `json:"updated_at"`
+}
+
+type PedidoItem struct {
+	ID            uint      `gorm:"primaryKey" json:"id"`
+	MonthlyListID uint      `gorm:"not null;uniqueIndex:idx_pedido" json:"monthly_list_id"`
+	UserID        uint      `gorm:"not null;uniqueIndex:idx_pedido" json:"user_id"`
+	ProductID     uint      `gorm:"not null;uniqueIndex:idx_pedido" json:"product_id"`
+	Cantidad      int       `gorm:"not null" json:"cantidad"`
+	PrecioUsd     float64   `json:"precio_usd"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type MonthlyListItem struct {
