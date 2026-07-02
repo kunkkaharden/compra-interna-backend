@@ -7,6 +7,7 @@ type User struct {
 	Usuario     string    `gorm:"uniqueIndex;not null" json:"usuario"`
 	Nombre      string    `json:"nombre"`
 	Contrasenna string    `gorm:"not null" json:"-"`
+	Role        string    `gorm:"not null;default:'client'" json:"role"`
 	IsActive    bool      `gorm:"not null" json:"isactive"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`

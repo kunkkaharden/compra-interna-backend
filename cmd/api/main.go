@@ -64,6 +64,7 @@ func main() {
 		protected.PATCH("/monthly-lists/:id/close", monthlyListHandler.Close)
 
 		protected.GET("/pedidos", pedidoHandler.Get)
+		protected.GET("/pedidos/all", pedidoHandler.GetAll)
 		protected.POST("/pedidos", pedidoHandler.Save)
 	}
 

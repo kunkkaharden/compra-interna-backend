@@ -48,6 +48,59 @@ func (h *PedidoHandler) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, items)
 }
 
+// GetAll returns all pedido items for a list (admin use).
+func (h *PedidoHandler) GetAll(c *gin.Context) {
+	listaIDRaw := c.Query("lista_id")
+	if listaIDRaw == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "lista_id requerido"})
+		return
+	}
+	listaID, err := strconv.Atoi(listaIDRaw)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "lista_id inválido"})
+		return
+	}
+
+	type row struct {
+		models.PedidoItem
+		Usuario string `json:"usuario"`
+		Nombre  string `json:"nombre"`
+	}
+
+	var items []models.PedidoItem
+	if err := h.DB.Where("monthly_list_id = ?", listaID).Find(&items).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error interno"})
+		return
+	}
+
+	// Collect unique user IDs
+	userIDs := make([]uint, 0)
+	seen := map[uint]bool{}
+	for _, it := range items {
+		if !seen[it.UserID] {
+			userIDs = append(userIDs, it.UserID)
+			seen[it.UserID] = true
+		}
+	}
+
+	var users []models.User
+	if len(userIDs) > 0 {
+		h.DB.Where("id IN ?", userIDs).Find(&users)
+	}
+	userMap := map[uint]models.User{}
+	for _, u := range users {
+		userMap[u.ID] = u
+	}
+
+	result := make([]row, 0, len(items))
+	for _, it := range items {
+		u := userMap[it.UserID]
+		result = append(result, row{PedidoItem: it, Usuario: u.Usuario, Nombre: u.Nombre})
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
 func (h *PedidoHandler) Save(c *gin.Context) {
 	user := middleware.CurrentUser(c)
 
