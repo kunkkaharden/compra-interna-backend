@@ -44,28 +44,36 @@ func main() {
 	{
 		protected.GET("/auth/me", authHandler.Me)
 
-		protected.GET("/users", userHandler.List)
-		protected.POST("/users", userHandler.Create)
-		protected.GET("/users/:id", userHandler.Get)
-		protected.PUT("/users/:id", userHandler.Update)
-		protected.DELETE("/users/:id", userHandler.Delete)
-
 		protected.GET("/products", productHandler.List)
-		protected.POST("/products", productHandler.Create)
-		protected.PUT("/products/:id", productHandler.Update)
-		protected.PATCH("/products/:id/archive", productHandler.Archive)
-		protected.PATCH("/products/:id/unarchive", productHandler.Unarchive)
-
 		protected.GET("/monthly-lists", monthlyListHandler.List)
-		protected.POST("/monthly-lists", monthlyListHandler.Create)
 		protected.GET("/monthly-lists/:id", monthlyListHandler.Get)
-		protected.PUT("/monthly-lists/:id", monthlyListHandler.Update)
-		protected.DELETE("/monthly-lists/:id", monthlyListHandler.Delete)
-		protected.PATCH("/monthly-lists/:id/close", monthlyListHandler.Close)
 
 		protected.GET("/pedidos", pedidoHandler.Get)
-		protected.GET("/pedidos/all", pedidoHandler.GetAll)
 		protected.POST("/pedidos", pedidoHandler.Save)
+		protected.GET("/users/count", userHandler.Count)
+	}
+
+	admin := api.Group("")
+	admin.Use(middleware.RequireAuth(cfg.JWTSecret, gormDB), middleware.RequireAdmin())
+	{
+		admin.GET("/users", userHandler.List)
+		admin.POST("/users", userHandler.Create)
+		admin.GET("/users/:id", userHandler.Get)
+		admin.PUT("/users/:id", userHandler.Update)
+		admin.DELETE("/users/:id", userHandler.Delete)
+
+		admin.POST("/products", productHandler.Create)
+		admin.PUT("/products/:id", productHandler.Update)
+		admin.PATCH("/products/:id/archive", productHandler.Archive)
+		admin.PATCH("/products/:id/unarchive", productHandler.Unarchive)
+
+		admin.POST("/monthly-lists", monthlyListHandler.Create)
+		admin.PUT("/monthly-lists/:id", monthlyListHandler.Update)
+		admin.DELETE("/monthly-lists/:id", monthlyListHandler.Delete)
+		admin.PATCH("/monthly-lists/:id/close", monthlyListHandler.Close)
+		admin.PATCH("/monthly-lists/:id/reopen", monthlyListHandler.Reopen)
+
+		admin.GET("/pedidos/all", pedidoHandler.GetAll)
 	}
 
 	log.Printf("listening on :%s", cfg.Port)

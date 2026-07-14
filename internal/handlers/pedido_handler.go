@@ -19,11 +19,13 @@ type pedidoItemRequest struct {
 	ProductID uint    `json:"product_id" binding:"required"`
 	Cantidad  int     `json:"cantidad" binding:"required"`
 	PrecioUsd float64 `json:"precio_usd"`
+	Lista     string  `json:"lista"`
 }
 
 type savePedidoRequest struct {
 	MonthlyListID uint                `json:"monthly_list_id" binding:"required"`
 	Items         []pedidoItemRequest `json:"items"`
+	UserID        *uint               `json:"user_id"`
 }
 
 func (h *PedidoHandler) Get(c *gin.Context) {
@@ -110,19 +112,28 @@ func (h *PedidoHandler) Save(c *gin.Context) {
 		return
 	}
 
+	targetUserID := user.ID
+	if req.UserID != nil && *req.UserID != user.ID {
+		if user.Role != "admin" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "no autorizado para editar el pedido de otro usuario"})
+			return
+		}
+		targetUserID = *req.UserID
+	}
+
 	// Verify list exists and is not cerrado
 	var list models.MonthlyList
 	if err := h.DB.First(&list, req.MonthlyListID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "lista no encontrada"})
 		return
 	}
-	if list.Cerrado {
+	if list.Cerrado && user.Role != "admin" {
 		c.JSON(http.StatusConflict, gin.H{"error": "lista cerrada, no se puede modificar"})
 		return
 	}
 
 	err := h.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("monthly_list_id = ? AND user_id = ?", req.MonthlyListID, user.ID).
+		if err := tx.Where("monthly_list_id = ? AND user_id = ?", req.MonthlyListID, targetUserID).
 			Delete(&models.PedidoItem{}).Error; err != nil {
 			return err
 		}
@@ -130,10 +141,15 @@ func (h *PedidoHandler) Save(c *gin.Context) {
 			if it.Cantidad <= 0 {
 				continue
 			}
+			lista := it.Lista
+			if lista != "extra" {
+				lista = "bono"
+			}
 			item := models.PedidoItem{
 				MonthlyListID: req.MonthlyListID,
-				UserID:        user.ID,
+				UserID:        targetUserID,
 				ProductID:     it.ProductID,
+				Lista:         lista,
 				Cantidad:      it.Cantidad,
 				PrecioUsd:     it.PrecioUsd,
 			}
@@ -149,6 +165,6 @@ func (h *PedidoHandler) Save(c *gin.Context) {
 	}
 
 	var saved []models.PedidoItem
-	h.DB.Where("monthly_list_id = ? AND user_id = ?", req.MonthlyListID, user.ID).Find(&saved)
+	h.DB.Where("monthly_list_id = ? AND user_id = ?", req.MonthlyListID, targetUserID).Find(&saved)
 	c.JSON(http.StatusOK, saved)
 }

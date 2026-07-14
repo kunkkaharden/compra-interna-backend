@@ -38,6 +38,7 @@ type PedidoItem struct {
 	MonthlyListID uint      `gorm:"not null;uniqueIndex:idx_pedido" json:"monthly_list_id"`
 	UserID        uint      `gorm:"not null;uniqueIndex:idx_pedido" json:"user_id"`
 	ProductID     uint      `gorm:"not null;uniqueIndex:idx_pedido" json:"product_id"`
+	Lista         string    `gorm:"not null;default:'bono';uniqueIndex:idx_pedido" json:"lista"`
 	Cantidad      int       `gorm:"not null" json:"cantidad"`
 	PrecioUsd     float64   `json:"precio_usd"`
 	CreatedAt     time.Time `json:"created_at"`

@@ -128,6 +128,19 @@ func (h *MonthlyListHandler) Close(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func (h *MonthlyListHandler) Reopen(c *gin.Context) {
+	result := h.DB.Model(&models.MonthlyList{}).Where("id = ?", c.Param("id")).Update("cerrado", false)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error interno"})
+		return
+	}
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "lista no encontrada"})
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
 func (h *MonthlyListHandler) Update(c *gin.Context) {
 	var list models.MonthlyList
 	if err := h.DB.First(&list, c.Param("id")).Error; err != nil {

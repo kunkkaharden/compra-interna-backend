@@ -46,3 +46,13 @@ func RequireAuth(secret string, db *gorm.DB) gin.HandlerFunc {
 func CurrentUser(c *gin.Context) models.User {
 	return c.MustGet(ContextUserKey).(models.User)
 }
+
+func RequireAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if CurrentUser(c).Role != "admin" {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "requiere rol admin"})
+			return
+		}
+		c.Next()
+	}
+}

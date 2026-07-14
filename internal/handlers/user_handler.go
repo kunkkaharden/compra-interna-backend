@@ -24,6 +24,17 @@ type createUserRequest struct {
 	IsActive    *bool  `json:"isactive"`
 }
 
+// Count returns the number of active client users, without exposing who they are.
+// Used by clients to estimate a fair per-person share of limited stock.
+func (h *UserHandler) Count(c *gin.Context) {
+	var count int64
+	if err := h.DB.Model(&models.User{}).Where("role = ? AND is_active = ?", "client", true).Count(&count).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error interno"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"count": count})
+}
+
 func (h *UserHandler) List(c *gin.Context) {
 	var users []models.User
 	if err := h.DB.Find(&users).Error; err != nil {
