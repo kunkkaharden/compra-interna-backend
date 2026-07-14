@@ -19,7 +19,7 @@ func main() {
 	usuario := flag.String("usuario", "", "nombre de usuario a crear")
 	contrasenna := flag.String("contrasenna", "", "contraseña en texto plano")
 	role := flag.String("role", "client", "rol del usuario: admin o client")
-	dbPath := flag.String("db", "", "ruta al archivo sqlite (default: DB_PATH env var o compra_interna.db)")
+	databaseURLFlag := flag.String("db", "", "URL de Postgres (default: DATABASE_URL env var)")
 	ensureAdmin := flag.Bool("ensure-admin", false, "crear admin por defecto desde env si no existe")
 	flag.Parse()
 
@@ -40,15 +40,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	path := *dbPath
-	if path == "" {
-		path = os.Getenv("DB_PATH")
+	databaseURL := *databaseURLFlag
+	if databaseURL == "" {
+		databaseURL = os.Getenv("DATABASE_URL")
 	}
-	if path == "" {
-		path = "compra_interna.db"
+	if databaseURL == "" {
+		fmt.Fprintln(os.Stderr, "DATABASE_URL env var is required")
+		os.Exit(1)
 	}
 
-	gormDB, err := db.Open(path)
+	gormDB, err := db.Open(databaseURL)
 	if err != nil {
 		log.Fatalf("db error: %v", err)
 	}

@@ -19,7 +19,7 @@ func main() {
 		log.Fatalf("config error: %v", err)
 	}
 
-	gormDB, err := db.Open(cfg.DBPath)
+	gormDB, err := db.Open(cfg.DatabaseURL)
 	if err != nil {
 		log.Fatalf("db error: %v", err)
 	}
@@ -87,7 +87,6 @@ func main() {
 		log.Fatalf("server error: %v", err)
 	}
 }
-
 
 func corsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {

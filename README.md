@@ -7,10 +7,12 @@ catálogo de productos y lista mensual. Ver diseño completo en
 ## Setup
 
 ```bash
-cp .env.example .env   # editar JWT_SECRET
+cp .env.example .env   # editar JWT_SECRET y DATABASE_URL si usas PostgreSQL
 export $(cat .env | xargs)
 go run ./cmd/api
 ```
+
+Para usar PostgreSQL establece `DATABASE_URL`.
 
 ## Crear primer usuario
 

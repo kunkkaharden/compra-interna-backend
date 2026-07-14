@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	Port           string
-	DBPath         string
+	DatabaseURL    string
 	JWTSecret      string
 	JWTExpiryHours int
 }
@@ -24,9 +24,9 @@ func Load() (*Config, error) {
 		port = "8080"
 	}
 
-	dbPath := os.Getenv("DB_PATH")
-	if dbPath == "" {
-		dbPath = "compra_interna.db"
+	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL == "" {
+		return nil, fmt.Errorf("DATABASE_URL env var is required")
 	}
 
 	expiryHours := 24
@@ -40,7 +40,7 @@ func Load() (*Config, error) {
 
 	return &Config{
 		Port:           port,
-		DBPath:         dbPath,
+		DatabaseURL:    databaseURL,
 		JWTSecret:      secret,
 		JWTExpiryHours: expiryHours,
 	}, nil
