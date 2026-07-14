@@ -1,0 +1,16 @@
+app = "compra-interna-backend"
+primary_region = "bog"
+
+[env]
+  PORT = "8080"
+  DB_PATH = "/data/compra_interna.db"
+  JWT_EXPIRY_HOURS = "24"
+  JWT_SECRET = "kada-compra-interna-dev-secret-2026"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+
+[[mounts]]
+  source = "data"
+  destination = "/data"

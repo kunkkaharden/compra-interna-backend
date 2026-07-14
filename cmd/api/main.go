@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/kada/compra-interna-backend/internal/bootstrap"
 	"github.com/kada/compra-interna-backend/internal/config"
 	"github.com/kada/compra-interna-backend/internal/db"
 	"github.com/kada/compra-interna-backend/internal/handlers"
@@ -21,6 +22,11 @@ func main() {
 	gormDB, err := db.Open(cfg.DBPath)
 	if err != nil {
 		log.Fatalf("db error: %v", err)
+	}
+
+	// Ensure a default admin user exists (user/pass from env or fallbacks).
+	if err := bootstrap.EnsureDefaultAdmin(gormDB); err != nil {
+		log.Fatalf("ensure admin: %v", err)
 	}
 
 	router := gin.Default()
@@ -81,6 +87,7 @@ func main() {
 		log.Fatalf("server error: %v", err)
 	}
 }
+
 
 func corsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {

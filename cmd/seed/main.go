@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/kada/compra-interna-backend/internal/auth"
+	"github.com/kada/compra-interna-backend/internal/bootstrap"
 	"github.com/kada/compra-interna-backend/internal/db"
 	"github.com/kada/compra-interna-backend/internal/models"
 )
@@ -19,11 +20,20 @@ func main() {
 	contrasenna := flag.String("contrasenna", "", "contraseña en texto plano")
 	role := flag.String("role", "client", "rol del usuario: admin o client")
 	dbPath := flag.String("db", "", "ruta al archivo sqlite (default: DB_PATH env var o compra_interna.db)")
+	ensureAdmin := flag.Bool("ensure-admin", false, "crear admin por defecto desde env si no existe")
 	flag.Parse()
 
-	if *usuario == "" || *contrasenna == "" {
-		fmt.Fprintln(os.Stderr, "uso: seed -usuario=<usuario> -contrasenna=<contrasenna> [-role=admin|client]")
-		os.Exit(1)
+	if *ensureAdmin {
+		// usuario/contrasenna no son requeridos cuando se usa ensure-admin
+	} else {
+		if *usuario == "" || *contrasenna == "" {
+			fmt.Fprintln(os.Stderr, "uso: seed -usuario=<usuario> -contrasenna=<contrasenna> [-role=admin|client] or -ensure-admin")
+			os.Exit(1)
+		}
+		if *role != "admin" && *role != "client" {
+			fmt.Fprintln(os.Stderr, "role debe ser 'admin' o 'client'")
+			os.Exit(1)
+		}
 	}
 	if *role != "admin" && *role != "client" {
 		fmt.Fprintln(os.Stderr, "role debe ser 'admin' o 'client'")
@@ -41,6 +51,13 @@ func main() {
 	gormDB, err := db.Open(path)
 	if err != nil {
 		log.Fatalf("db error: %v", err)
+	}
+
+	if *ensureAdmin {
+		if err := bootstrap.EnsureDefaultAdmin(gormDB); err != nil {
+			log.Fatalf("ensure admin: %v", err)
+		}
+		return
 	}
 
 	hash, err := auth.HashPassword(*contrasenna)
